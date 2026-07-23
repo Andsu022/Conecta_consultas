@@ -1,0 +1,38 @@
+# Ambientes Virtuais (Python Virtual Environments)
+venv/
+.venv/
+env/
+backend/venv/
+backend/.venv/
+
+# Caches e arquivos compilados do Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+
+# Bancos de dados e dados locais
+*.db
+*.sqlite
+*.sqlite3
+backend/*.db
+
+# Chaves de segurança, senhas e variáveis de ambiente
+.env
+.env.local
+*.pem
+*.pub
+id_rsa*
+
+# Arquivos de IDEs e Editores de Código
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
