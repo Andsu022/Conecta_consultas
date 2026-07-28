@@ -1,4 +1,4 @@
-import datetime
+from datetime import date
 import sqlite3
 class Paciente():
     def __init__(self):  # Conexão com o banco de dados
