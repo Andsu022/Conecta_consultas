@@ -1,5 +1,7 @@
 from datetime import date
 import sqlite3
+
+
 class Paciente():
     def __init__(self):  # Conexão com o banco de dados
         self.connect = sqlite3.connect('databank.db')
@@ -23,8 +25,9 @@ class Paciente():
             cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
             self.connect.commit()
             self.connect.close()
+            return "Paciente cadastrado com sucesso"
         else:
-            print("CPF já cadastrado")
+            return "CPF já cadastrado"
 
         
     
