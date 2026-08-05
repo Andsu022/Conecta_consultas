@@ -34,12 +34,13 @@ class Paciente():
 
     def listar_pacientes(self):
         self.connect = sqlite3.connect("databank.db")
+        self.connect.row_factory = sqlite3.Row
         cursor = self.connect.cursor()
         cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
         pacientes = cursor.fetchall()
-        if len(pacientes) == 0:
-            self.connect.close()
-            return "Nenhum paciente cadastrado"
-        else:
-            self.connect.close()
-            return pacientes
+        self.connect.close()
+        
+        if not pacientes:
+            return {"message": "Nenhum paciente cadastrado"}
+        
+        return [dict(paciente) for paciente in pacientes]
