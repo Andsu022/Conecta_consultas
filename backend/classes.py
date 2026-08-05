@@ -19,14 +19,27 @@ class Paciente():
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
-        cursor.execute("SELECT cpf FROM Pacientes WHERE cpf = ?", (cpf,))
-        if cursor.fetchone() == None:
+        cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? AND email = ?", (cpf, email))
+        result = cursor.fetchone()
+        if result == None:
             cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
             self.connect.commit()
             self.connect.close()
             return "Paciente cadastrado com sucesso"
         else:
-            return "CPF já cadastrado"
+            if result[0] == cpf:
+                return "CPF já cadastrado"
+            else:
+                return "Email já cadastrado"
 
-        
-    
+    def listar_pacientes(self):
+        self.connect = sqlite3.connect("databank.db")
+        cursor = self.connect.cursor()
+        cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
+        pacientes = cursor.fetchall()
+        if len(pacientes) == 0:
+            self.connect.close()
+            return "Nenhum paciente cadastrado"
+        else:
+            self.connect.close()
+            return pacientes
