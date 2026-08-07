@@ -80,7 +80,7 @@ python -m uvicorn backend.main:app --reload
 python backend/main.py
 ```
 
-> Observação: o fluxo atual está centrado na manipulação do banco local e na classe `Paciente` em [backend/classes.py](backend/classes.py).
+**Observação:** o fluxo atual está centrado na manipulação do banco local e na classe `Paciente` em [backend/classes.py](backend/classes.py).
 
 ---
 
