@@ -1,3 +1,8 @@
-# Dependências atuais do projeto
-# O backend utiliza apenas a biblioteca padrão do Python (sqlite3).
-# Não há pacotes externos obrigatórios no momento.
+# Dependências do projeto (ambiente recomendado)
+# Trave versões usadas no ambiente de desenvolvimento local.
+fastapi==0.139.2
+uvicorn==0.51.0
+# Dependências opcionais que podem ser úteis
+pydantic==1.10.2
+starlette==0.21.1
+typing-extensions==4.5.0

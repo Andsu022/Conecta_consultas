@@ -12,6 +12,8 @@ A persistência é feita com a biblioteca padrão do Python, `sqlite3`, sem uso 
 
 - **Python 3.x**
 - **SQLite** via `sqlite3`
+- **FastAPI** (opcional para API local)
+- **Uvicorn** (ASGI server)
 
 ## 📁 Estrutura do Projeto
 
@@ -47,11 +49,29 @@ source venv/bin/activate
 ```
 
 ### 2. Instalar dependências
-
-No momento, o projeto não depende de pacotes externos para funcionar, então o arquivo [requirements.txt](requirements.txt) serve apenas como referência de ambiente e documentação.
+Instale as dependências recomendadas no `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Verificação rápida (FastAPI)
+
+Após ativar o `venv`, confirme que `fastapi` e `uvicorn` estão instalados:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+pip show fastapi
+pip show uvicorn
+python -c "import fastapi; print(fastapi.__version__)"
+```
+
+Para testar manualmente um servidor ASGI (exemplo local):
+
+```powershell
+# se houver um app FastAPI em backend/main.py exposto como variable 'app'
+python -m uvicorn backend.main:app --reload
+# ou, para um pequeno teste rápido, crie um módulo temporário com um app e rode uvicorn
 ```
 
 ### 3. Executar a aplicação

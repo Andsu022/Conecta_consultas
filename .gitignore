@@ -41,3 +41,11 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Arquivos gerados por testes locais e ferramentas
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Venv específicos do projeto
+backend/.venv/
