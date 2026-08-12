@@ -1,3 +1,5 @@
+# Regras de negócio\classe de dados e interação com o banco de dados
+
 from datetime import date
 import sqlite3
 
@@ -19,18 +21,19 @@ class Paciente():
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
-        cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? AND email = ?", (cpf, email))
+        cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? OR email = ?", (cpf, email))
         result = cursor.fetchone()
         if result == None:
             cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
             self.connect.commit()
             self.connect.close()
-            return "Paciente cadastrado com sucesso"
+            return {"message": "Paciente cadastrado com sucesso"}
         else:
+            self.connect.close()
             if result[0] == cpf:
-                return "CPF já cadastrado"
+                return {"message": "CPF já cadastrado"}
             else:
-                return "Email já cadastrado"
+                return {"message": "Email já cadastrado"}
 
     def listar_pacientes(self):
         self.connect = sqlite3.connect("databank.db")
@@ -39,10 +42,9 @@ class Paciente():
         cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
         pacientes = cursor.fetchall()
         self.connect.close()
-        
         if not pacientes:
             return {"message": "Nenhum paciente cadastrado"}
-        
+
         return [dict(paciente) for paciente in pacientes]
 
 
@@ -54,32 +56,31 @@ class Medico():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             crm TEXT NOT NULL,
-            especialidade TEXT NOT NULL,
+            especialidade TEXT NOT NULL
         )''')
         self.connect.commit()
         self.connect.close()
 
-    def cadastrar_medico(self, nome, crm, especialidade, telefone, email):
+    def cadastrar_medico(self, nome, crm, especialidade):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
-        cursor.execute("SELECT crm, email FROM Medicos WHERE crm = ? AND email = ?", (crm, email))
+        cursor.execute("SELECT crm FROM Medicos WHERE crm = ?", (crm,))
         result = cursor.fetchone()
         if result == None:
-            cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, crm, especialidade, telefone, email))
+            cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade) VALUES (?, ?, ?)""", (nome, crm, especialidade))
             self.connect.commit()
             self.connect.close()
-            return "Médico cadastrado com sucesso"
+            return {"message": "Médico cadastrado com sucesso"}
         else:
+            self.connect.close()
             if result[0] == crm:
-                return "CRM já cadastrado"
-            else:
-                return "Email já cadastrado"
+                return {"message": "Médico já cadastrado"}
 
     def listar_medicos(self):
         self.connect = sqlite3.connect("databank.db")
         self.connect.row_factory = sqlite3.Row
         cursor = self.connect.cursor()
-        cursor.execute("SELECT id, nome, crm, especialidade, telefone, email FROM Medicos")
+        cursor.execute("SELECT id, nome, crm, especialidade FROM Medicos")
         medicos = cursor.fetchall()
         self.connect.close()
         
@@ -113,6 +114,7 @@ class Consulta():
             cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
             self.connect.commit()
             self.connect.close()
-            return "Consulta agendada com sucesso"
+            return {"message": "Consulta agendada com sucesso"}
         else:
-            return "Horário indisponível para o médico selecionado"
+            self.connect.close()
+            return {"message": "Horário indisponível para o médico selecionado"}
