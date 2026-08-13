@@ -1,29 +1,33 @@
 # Conecta Consulta
 
-O **Conecta Consulta** é um projeto em desenvolvimento para cadastro de pacientes, usando Python e persistência local em SQLite.
+O **Conecta Consulta** é um sistema de agendamento de consultas médicas e gestão de cadastros (pacientes e médicos), desenvolvido em Python com persistência local em SQLite e API REST construída com FastAPI.
 
 ## Visão Geral
 
-Este repositório atualmente concentra a lógica principal em [backend/classes.py](backend/classes.py), onde a classe `Paciente` cria a tabela `Pacientes` e realiza o cadastro com validação simples de CPF.
-
-A persistência é feita com a biblioteca padrão do Python, `sqlite3`, sem uso de framework web neste momento.
+O projeto está estruturado em:
+- **[backend/classes.py](backend/classes.py)**: Camada de regras de negócio e manipulação do banco de dados SQLite (`databank.db`), contemplando as classes:
+  - `Paciente`: Criação de tabela, verificação de duplicidade por CPF/Email, cadastro e listagem.
+  - `Medico`: Criação de tabela, verificação de duplicidade por CRM, cadastro e listagem.
+  - `Consulta`: Criação de tabela com relacionamentos (Foreign Keys para Paciente e Médico), verificação de disponibilidade de horário e agendamento.
+- **[backend/main.py](backend/main.py)**: API REST desenvolvida com FastAPI e Pydantic para validação de dados e comunicação HTTP, contando com suporte a CORS.
 
 ## 🚀 Tecnologias
 
-- **Python 3.x**
-- **SQLite** via `sqlite3`
-- **FastAPI** (opcional para API local)
-- **Uvicorn** (ASGI server)
+- **Python 3.10+**
+- **FastAPI** (API REST backend)
+- **Pydantic** (Validação de schemas e dados de entrada)
+- **Uvicorn** (Servidor ASGI)
+- **SQLite3** (Persistência de dados local)
 
 ## 📁 Estrutura do Projeto
 
 ```text
 Conecte_Consulta/
 ├── backend/
-│   ├── databank/         # Diretório de armazenamento local do banco
-│   ├── classes.py        # Lógica de criação da tabela e cadastro de pacientes
-│   └── main.py           # Arquivo de entrada atual do backend
-├── requirements.txt      # Arquivo de dependências do projeto
+│   ├── database/         # Armazenamento local do banco de dados (databank.db)
+│   ├── classes.py        # Classes (Paciente, Medico, Consulta) e operações SQLite
+│   └── main.py           # Servidor FastAPI (rotas REST, validação Pydantic e CORS)
+├── requirements.txt      # Dependências do projeto
 ├── .gitignore
 └── README.md
 ```
@@ -38,52 +42,49 @@ Conecte_Consulta/
 
 **Windows (PowerShell):**
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+python -m venv backend/venv
+.\backend\venv\Scripts\Activate.ps1
 ```
 
 **Linux / macOS:**
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv backend/venv
+source backend/venv/bin/activate
 ```
 
 ### 2. Instalar dependências
-Instale as dependências recomendadas no `requirements.txt`:
+
+Instale as dependências listadas no `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Verificação rápida (FastAPI)
+### 3. Executar a aplicação (Servidor FastAPI)
 
-Após ativar o `venv`, confirme que `fastapi` e `uvicorn` estão instalados:
-
-```powershell
-.\venv\Scripts\Activate.ps1
-pip show fastapi
-pip show uvicorn
-python -c "import fastapi; print(fastapi.__version__)"
-```
-
-Para testar manualmente um servidor ASGI (exemplo local):
-
-```powershell
-# se houver um app FastAPI em backend/main.py exposto como variable 'app'
-python -m uvicorn backend.main:app --reload
-# ou, para um pequeno teste rápido, crie um módulo temporário com um app e rode uvicorn
-```
-
-### 3. Executar a aplicação
+Na raiz do projeto, execute o Uvicorn para subir o servidor backend:
 
 ```bash
-python backend/main.py
+uvicorn backend.main:app --reload
 ```
 
-**Observação:** o fluxo atual está centrado na manipulação do banco local e na classe `Paciente` em [backend/classes.py](backend/classes.py).
+A API estará acessível em `http://127.0.0.1:8000`.
+
+### 📌 Documentação Interativa (Swagger / OpenAPI)
+
+Após iniciar o servidor, você pode acessar e testar as rotas via documentação interativa:
+- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+
+## 🔗 Endpoints Principais
+
+- `POST /paciente` — Cadastrar um novo paciente.
+- `GET /paciente` — Listar todos os pacientes cadastrados.
+- `POST /medico` — Cadastrar um novo médico.
 
 ---
 
 ## 📝 Status do Projeto
 
-O projeto está em desenvolvimento inicial, com foco no cadastro e validação de pacientes em banco SQLite local.
+O projeto conta com a estrutura completa de classes e banco de dados para Pacientes, Médicos e Consultas, além da integração inicial de rotas HTTP com FastAPI. Em desenvolvimento contínuo.
+

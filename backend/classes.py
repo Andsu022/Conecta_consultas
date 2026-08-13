@@ -114,10 +114,11 @@ class Consulta():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             paciente_id INTEGER NOT NULL,
             medico_id INTEGER NOT NULL,
-            data_consulta TEXT (AAAA-MM-DD) NOT NULL UNIQUE,
-            hora_consulta TEXT (HH:MM) NOT NULL UNIQUE,
+            data_consulta TEXT (AAAA-MM-DD) NOT NULL,
+            hora_consulta TEXT (HH:MM) NOT NULL,
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
-            FOREIGN KEY (medico_id) REFERENCES Medicos(id)
+            FOREIGN KEY (medico_id) REFERENCES Medicos(id),
+            UNIQUE(medico_id, data_consulta, hora_consulta)
         )''')
         self.connect.commit()
         self.connect.close()
