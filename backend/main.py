@@ -4,6 +4,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from datetime import date, time
 
 class Paciente_Create(BaseModel):
     nome: str
@@ -20,8 +21,8 @@ class Medico_Create(BaseModel):
 class Consulta_Create(BaseModel):
     paciente_id: int
     medico_id: int
-    data_consulta: str
-    hora_consulta: str
+    data_consulta: date
+    hora_consulta: time
 
 app = FastAPI()
 app.add_middleware(
@@ -53,11 +54,12 @@ def cadastrar_paciente(paciente:Paciente_Create):
 
 @app.get("/paciente")
 def listar_pacientes():
-    resultado = paciente_service.listar_pacientes()
-    if isinstance(resultado, dict) and "Nenhum paciente cadastrado" in resultado.get("message", ""):
-        raise HTTPException(status_code=404, detail=resultado)
-    else:
-        return resultado
+    try:
+        lista_pacientes = paciente_service.listar_pacientes()
+        return lista_pacientes
+        
+    except ValueError as erro:
+        raise HTTPException(status_code=404, detail=str(erro))
 
 @app.post("/medico", status_code=201)
 def cadastrar_medico(medico:Medico_Create):
@@ -72,3 +74,12 @@ def cadastrar_medico(medico:Medico_Create):
 
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
+
+@app.get("/medico")
+def listar_medicos():
+    try:
+        lista_medicos = medico_service.listar_medicos()
+        return lista_medicos
+
+    except ValueError as erro:
+        raise HTTPException(status_code=404, detail=str(erro))

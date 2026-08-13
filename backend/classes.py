@@ -1,6 +1,5 @@
 # Regras de negócio\classe de dados e interação com o banco de dados
 
-from datetime import date
 import sqlite3
 
 class Paciente():
@@ -51,6 +50,7 @@ class Paciente():
         cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
         pacientes = cursor.fetchall()
         self.connect.close()
+        
         if not pacientes:
             raise ValueError("Nenhum paciente cadastrado")
 
@@ -107,6 +107,7 @@ class Medico():
             raise ValueError("Nenhum médico cadastrado")
         
         return [dict(medico) for medico in medicos]
+            
 
 class Consulta():
     def __init__(self):  # Conexão com o banco de dados
@@ -132,6 +133,7 @@ class Consulta():
         cursor.execute("SELECT medico_id, data_consulta, hora_consulta FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
         result = cursor.fetchone()
         self.connect.close()
+        
         if result == None:
             return False
         else:
@@ -139,6 +141,7 @@ class Consulta():
 
     def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
         consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
+        
         if consulta_existente:
             raise ValueError("Data e horário indisponíveis para o médico selecionado")
 
