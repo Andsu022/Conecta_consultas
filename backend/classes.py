@@ -6,14 +6,15 @@ import sqlite3
 class Paciente():
     def __init__(self):  # Conexão com o banco de dados
         self.connect = sqlite3.connect("databank.db")
+        self.connect.execute("PRAGMA foreign_keys = ON")
         cursor = self.connect.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             cpf TEXT NOT NULL UNIQUE,
-            data_nascimento TEXT (AAAA-MM-DD) NOT NULL,
-            telefone TEXT NOT NULL,
-            email TEXT UNIQUE
+            data_nascimento TEXT NOT NULL,
+            telefone TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL UNIQUE
         )''')
         self.connect.commit()
         self.connect.close()
@@ -59,6 +60,7 @@ class Paciente():
 class Medico():
     def __init__(self):  # Conexão com o banco de dados
         self.connect = sqlite3.connect("databank.db")
+        self.connect.execute("PRAGMA foreign_keys = ON")
         cursor = self.connect.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,30 +111,41 @@ class Medico():
 class Consulta():
     def __init__(self):  # Conexão com o banco de dados
         self.connect = sqlite3.connect("databank.db")
+        self.connect.execute("PRAGMA foreign_keys = ON")
         cursor = self.connect.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS Consultas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             paciente_id INTEGER NOT NULL,
             medico_id INTEGER NOT NULL,
-            data_consulta TEXT (AAAA-MM-DD) NOT NULL,
-            hora_consulta TEXT (HH:MM) NOT NULL,
+            data_consulta TEXT NOT NULL,
+            hora_consulta TEXT NOT NULL,
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
             FOREIGN KEY (medico_id) REFERENCES Medicos(id),
             UNIQUE(medico_id, data_consulta, hora_consulta)
         )''')
         self.connect.commit()
         self.connect.close()
-
-    def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
+    def consulta_existente(self, medico_id, data_consulta, hora_consulta):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
-        cursor.execute("SELECT * FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
+        cursor.execute("SELECT medico_id, data_consulta, hora_consulta FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
         result = cursor.fetchone()
+        self.connect.close()
         if result == None:
-            cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
-            self.connect.commit()
-            self.connect.close()
-            return {"message": "Consulta agendada com sucesso"}
+            return False
         else:
-            self.connect.close()
-            return {"message": "Horário indisponível para o médico selecionado"}
+            return True
+
+    def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
+        consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
+        if consulta_existente:
+            raise ValueError("Horário indisponível para o médico selecionado")
+
+        self.connect = sqlite3.connect("databank.db")
+        cursor = self.connect.cursor()
+        cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
+        self.connect.commit()
+        self.connect.close()
+        return True
+
+        
