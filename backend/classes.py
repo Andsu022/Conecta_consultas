@@ -52,7 +52,7 @@ class Paciente():
         pacientes = cursor.fetchall()
         self.connect.close()
         if not pacientes:
-            return {"message": "Nenhum paciente cadastrado"}
+            raise ValueError("Nenhum paciente cadastrado")
 
         return [dict(paciente) for paciente in pacientes]
 
@@ -104,7 +104,7 @@ class Medico():
         self.connect.close()
         
         if not medicos:
-            return {"message": "Nenhum médico cadastrado"}
+            raise ValueError("Nenhum médico cadastrado")
         
         return [dict(medico) for medico in medicos]
 
@@ -125,6 +125,7 @@ class Consulta():
         )''')
         self.connect.commit()
         self.connect.close()
+
     def consulta_existente(self, medico_id, data_consulta, hora_consulta):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
@@ -139,7 +140,7 @@ class Consulta():
     def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
         consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
         if consulta_existente:
-            raise ValueError("Horário indisponível para o médico selecionado")
+            raise ValueError("Data e horário indisponíveis para o médico selecionado")
 
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
@@ -148,4 +149,15 @@ class Consulta():
         self.connect.close()
         return True
 
+    def listar_consultas(self):
+        self.connect = sqlite3.connect("databank.db")
+        self.connect.row_factory = sqlite3.Row
+        cursor = self.connect.cursor()
+        cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta FROM Consultas")
+        consultas = cursor.fetchall()
+        self.connect.close()
         
+        if not consultas:
+            raise ValueError("Nenhuma consulta agendada")
+        
+        return [dict(consulta) for consulta in consultas]
