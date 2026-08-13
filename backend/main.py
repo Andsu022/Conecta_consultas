@@ -3,7 +3,6 @@ import classes
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 class Paciente_Create(BaseModel):
@@ -17,8 +16,6 @@ class Medico_Create(BaseModel):
     nome: str
     crm: str
     especialidade: str
-    telefone: str
-    email: str
 
 class Consulta_Create(BaseModel):
     paciente_id: int
@@ -29,33 +26,30 @@ class Consulta_Create(BaseModel):
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"]
 )
-#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 paciente_service = classes.Paciente()
 medico_service = classes.Medico()
 consulta_service = classes.Consulta()
 
-@app.post("/paciente")
+@app.post("/paciente", status_code=201)
 def cadastrar_paciente(paciente:Paciente_Create):
-    resultado = paciente_service.cadastrar_paciente(
-        nome = paciente.nome,
-        cpf = paciente.cpf,
-        data_nascimento = paciente.data_nascimento,
-        telefone = paciente.telefone,
-        email = paciente.email
-    )
-    message = resultado.get("message", "")
-    if "Paciente cadastrado com sucesso" in message:
-        return resultado
-    if "CPF já cadastrado" in message:
-        raise HTTPException(status_code=400, detail=resultado)
-    if "Email já cadastrado" in message:
-        raise HTTPException(status_code=400, detail=resultado)
+    try: 
+        paciente_service.cadastrar_paciente(
+            nome = paciente.nome,
+            cpf = paciente.cpf,
+            data_nascimento = paciente.data_nascimento,
+            telefone = paciente.telefone,
+            email = paciente.email
+        )
+        return {"message": "Paciente cadastrado com sucesso"}
+
+    except ValueError as erro:
+        raise HTTPException(status_code=409, detail=str(erro))
 
 @app.get("/paciente")
 def listar_pacientes():
@@ -65,18 +59,16 @@ def listar_pacientes():
     else:
         return resultado
 
-@app.post("/medico")
+@app.post("/medico", status_code=201)
 def cadastrar_medico(medico:Medico_Create):
-    resultado = medico_service.cadastrar_medico(
-        nome = medico.nome,
-        crm = medico.crm,
-        especialidade = medico.especialidade,
-        telefone = medico.telefone,
-        email = medico.email
-    )
-    if "Médico cadastrado com sucesso" in resultado:
-        return
-    if "CRM já cadastrado" in resultado:
-        raise HTTPException(status_code=400, detail=resultado)
-    if "Email já cadastrado" in resultado:
-        raise HTTPException(status_code=400, detail=resultado)
+    try:
+        medico_service.cadastrar_medico(
+            nome = medico.nome,
+            crm = medico.crm,
+            especialidade = medico.especialidade
+        )
+
+        return {"message": "Médico cadastrado com sucesso"}
+
+    except ValueError as erro:
+        raise HTTPException(status_code=409, detail=str(erro))

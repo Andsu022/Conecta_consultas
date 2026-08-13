@@ -3,6 +3,6 @@
 fastapi==0.139.2
 uvicorn==0.51.0
 # Dependências opcionais que podem ser úteis
-pydantic==1.10.2
+pydantic==2.x
 starlette==0.21.1
 typing-extensions==4.5.0

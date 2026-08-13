@@ -10,30 +10,38 @@ class Paciente():
         cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
-            cpf TEXT NOT NULL,
+            cpf TEXT NOT NULL UNIQUE,
             data_nascimento TEXT (AAAA-MM-DD) NOT NULL,
             telefone TEXT NOT NULL,
-            email TEXT
+            email TEXT UNIQUE
         )''')
         self.connect.commit()
         self.connect.close()
 
-    def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
+    def paciente_existente(self, cpf, email):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
         cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? OR email = ?", (cpf, email))
         result = cursor.fetchone()
+        
         if result == None:
-            cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
-            self.connect.commit()
             self.connect.close()
-            return {"message": "Paciente cadastrado com sucesso"}
+            return False
         else:
             self.connect.close()
-            if result[0] == cpf:
-                return {"message": "CPF já cadastrado"}
-            else:
-                return {"message": "Email já cadastrado"}
+            return True
+ 
+    def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
+        paciente_existente = self.paciente_existente(cpf,email)
+        if paciente_existente:
+            raise ValueError("CPF ou email já existentes")
+        
+        self.connect = sqlite3.connect("databank.db")
+        cursor = self.connect.cursor()
+        cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
+        self.connect.commit()
+        self.connect.close()
+        return True
 
     def listar_pacientes(self):
         self.connect = sqlite3.connect("databank.db")
@@ -55,26 +63,35 @@ class Medico():
         cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
-            crm TEXT NOT NULL,
+            crm TEXT NOT NULL UNIQUE,
             especialidade TEXT NOT NULL
         )''')
         self.connect.commit()
         self.connect.close()
 
-    def cadastrar_medico(self, nome, crm, especialidade):
+    def medico_cadastrado(self, crm):
         self.connect = sqlite3.connect("databank.db")
         cursor = self.connect.cursor()
         cursor.execute("SELECT crm FROM Medicos WHERE crm = ?", (crm,))
         result = cursor.fetchone()
         if result == None:
-            cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade) VALUES (?, ?, ?)""", (nome, crm, especialidade))
-            self.connect.commit()
             self.connect.close()
-            return {"message": "Médico cadastrado com sucesso"}
+            return False
         else:
             self.connect.close()
-            if result[0] == crm:
-                return {"message": "Médico já cadastrado"}
+            return True
+
+    def cadastrar_medico(self, nome, crm, especialidade):
+        medico_existente = self.medico_cadastrado(crm)
+        if medico_existente:
+            raise ValueError("Médico já cadastrado")
+        
+        self.connect = sqlite3.connect("databank.db")
+        cursor = self.connect.cursor()
+        cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade) VALUES (?, ?, ?)""", (nome, crm, especialidade))
+        self.connect.commit()
+        self.connect.close()
+        return True
 
     def listar_medicos(self):
         self.connect = sqlite3.connect("databank.db")
@@ -97,8 +114,8 @@ class Consulta():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             paciente_id INTEGER NOT NULL,
             medico_id INTEGER NOT NULL,
-            data_consulta TEXT (AAAA-MM-DD) NOT NULL,
-            hora_consulta TEXT (HH:MM) NOT NULL,
+            data_consulta TEXT (AAAA-MM-DD) NOT NULL UNIQUE,
+            hora_consulta TEXT (HH:MM) NOT NULL UNIQUE,
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
             FOREIGN KEY (medico_id) REFERENCES Medicos(id)
         )''')
