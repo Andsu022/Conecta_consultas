@@ -2,12 +2,20 @@
 
 import sqlite3
 
-class Paciente():
-    def __init__(self):  # Conexão com o banco de dados
+class ConexaoDatabase:
+    def __init__(self):
         self.connect = sqlite3.connect("databank.db")
         self.connect.execute("PRAGMA foreign_keys = ON")
-        cursor = self.connect.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
+        self.connect.row_factory = sqlite3.Row
+
+    def close_connection(self):
+        self.connect.close()
+
+class Paciente(ConexaoDatabase):
+    def __init__(self):  # Conexão com o banco de dados
+        super().__init__()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             cpf TEXT NOT NULL UNIQUE,
@@ -16,40 +24,32 @@ class Paciente():
             email TEXT NOT NULL UNIQUE
         )''')
         self.connect.commit()
-        self.connect.close()
 
     def paciente_existente(self, cpf, email):
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? OR email = ?", (cpf, email))
-        result = cursor.fetchone()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? OR email = ?", (cpf, email))
+        result = self.cursor.fetchone()
         
-        if result == None:
-            self.connect.close()
+        if result is None:
             return False
         else:
-            self.connect.close()
             return True
  
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
+        self.cursor = self.connect.cursor()
         paciente_existente = self.paciente_existente(cpf,email)
         if paciente_existente:
             raise ValueError("CPF ou email já existentes")
         
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
+        self.cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
         self.connect.commit()
-        self.connect.close()
+
         return True
 
     def listar_pacientes(self):
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.row_factory = sqlite3.Row
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
-        pacientes = cursor.fetchall()
-        self.connect.close()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
+        pacientes = self.cursor.fetchall()
         
         if not pacientes:
             raise ValueError("Nenhum paciente cadastrado")
@@ -57,51 +57,42 @@ class Paciente():
         return [dict(paciente) for paciente in pacientes]
 
 
-class Medico():
+class Medico(ConexaoDatabase):
     def __init__(self):  # Conexão com o banco de dados
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.execute("PRAGMA foreign_keys = ON")
-        cursor = self.connect.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
+        super().__init__()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             crm TEXT NOT NULL UNIQUE,
             especialidade TEXT NOT NULL
         )''')
         self.connect.commit()
-        self.connect.close()
 
     def medico_cadastrado(self, crm):
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT crm FROM Medicos WHERE crm = ?", (crm,))
-        result = cursor.fetchone()
-        if result == None:
-            self.connect.close()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT crm FROM Medicos WHERE crm = ?", (crm,))
+        result = self.cursor.fetchone()
+        
+        if result is None:
             return False
         else:
-            self.connect.close()
             return True
 
     def cadastrar_medico(self, nome, crm, especialidade):
+        self.cursor = self.connect.cursor()
         medico_existente = self.medico_cadastrado(crm)
         if medico_existente:
             raise ValueError("Médico já cadastrado")
         
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade) VALUES (?, ?, ?)""", (nome, crm, especialidade))
+        self.cursor.execute("""INSERT INTO Medicos (nome, crm, especialidade) VALUES (?, ?, ?)""", (nome, crm, especialidade))
         self.connect.commit()
-        self.connect.close()
         return True
 
     def listar_medicos(self):
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.row_factory = sqlite3.Row
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT id, nome, crm, especialidade FROM Medicos")
-        medicos = cursor.fetchall()
-        self.connect.close()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT id, nome, crm, especialidade FROM Medicos")
+        medicos = self.cursor.fetchall()
         
         if not medicos:
             raise ValueError("Nenhum médico cadastrado")
@@ -109,12 +100,11 @@ class Medico():
         return [dict(medico) for medico in medicos]
             
 
-class Consulta():
+class Consulta(ConexaoDatabase):
     def __init__(self):  # Conexão com o banco de dados
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.execute("PRAGMA foreign_keys = ON")
-        cursor = self.connect.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS Consultas (
+        super().__init__()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Consultas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             paciente_id INTEGER NOT NULL,
             medico_id INTEGER NOT NULL,
@@ -123,42 +113,35 @@ class Consulta():
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
             FOREIGN KEY (medico_id) REFERENCES Medicos(id),
             UNIQUE(medico_id, data_consulta, hora_consulta)
+            UNIQUE(paciente_id, data_consulta, hora_consulta)
         )''')
         self.connect.commit()
-        self.connect.close()
 
     def consulta_existente(self, medico_id, data_consulta, hora_consulta):
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT medico_id, data_consulta, hora_consulta FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
-        result = cursor.fetchone()
-        self.connect.close()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT medico_id, data_consulta, hora_consulta FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
+        result = self.cursor.fetchone()
         
-        if result == None:
+        if result is None:
             return False
         else:
             return True
 
     def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
+        self.cursor = self.connect.cursor()
         consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
         
         if consulta_existente:
             raise ValueError("Data e horário indisponíveis para o médico selecionado")
 
-        self.connect = sqlite3.connect("databank.db")
-        cursor = self.connect.cursor()
-        cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
+        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
         self.connect.commit()
-        self.connect.close()
         return True
 
     def listar_consultas(self):
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.row_factory = sqlite3.Row
-        cursor = self.connect.cursor()
-        cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta FROM Consultas")
-        consultas = cursor.fetchall()
-        self.connect.close()
+        self.cursor = self.connect.cursor()
+        self.cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta FROM Consultas")
+        consultas = self.cursor.fetchall()
         
         if not consultas:
             raise ValueError("Nenhuma consulta agendada")
