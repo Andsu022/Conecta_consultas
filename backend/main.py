@@ -1,24 +1,23 @@
 # Criação de rotas e API REST no FastAPI
 import classes
-import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date, time
 
-class Paciente_Create(BaseModel):
+class PacienteCreate(BaseModel):
     nome: str
     cpf: str
-    data_nascimento: str
+    data_nascimento: date
     telefone: str
     email: str
 
-class Medico_Create(BaseModel):
+class MedicoCreate(BaseModel):
     nome: str
     crm: str
     especialidade: str
 
-class Consulta_Create(BaseModel):
+class ConsultaCreate(BaseModel):
     paciente_id: int
     medico_id: int
     data_consulta: date
@@ -33,12 +32,9 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"]
 )
 
-paciente_service = classes.Paciente()
-medico_service = classes.Medico()
-consulta_service = classes.Consulta()
-
 @app.post("/paciente", status_code=201)
-def cadastrar_paciente(paciente:Paciente_Create):
+def cadastrar_paciente(paciente:PacienteCreate):
+    paciente_service = classes.Paciente()
     try: 
         paciente_service.cadastrar_paciente(
             nome = paciente.nome,
@@ -51,18 +47,24 @@ def cadastrar_paciente(paciente:Paciente_Create):
 
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
+    finally:
+        paciente_service.close_connection()
 
 @app.get("/paciente")
 def listar_pacientes():
+    paciente_service = classes.Paciente()
     try:
         lista_pacientes = paciente_service.listar_pacientes()
         return lista_pacientes
         
     except ValueError as erro:
         raise HTTPException(status_code=404, detail=str(erro))
+    finally:
+        paciente_service.close_connection()
 
 @app.post("/medico", status_code=201)
-def cadastrar_medico(medico:Medico_Create):
+def cadastrar_medico(medico:MedicoCreate):
+    medico_service = classes.Medico()
     try:
         medico_service.cadastrar_medico(
             nome = medico.nome,
@@ -74,12 +76,17 @@ def cadastrar_medico(medico:Medico_Create):
 
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
+    finally:
+        medico_service.close_connection()
 
 @app.get("/medico")
 def listar_medicos():
+    medico_service = classes.Medico()
     try:
         lista_medicos = medico_service.listar_medicos()
         return lista_medicos
 
     except ValueError as erro:
         raise HTTPException(status_code=404, detail=str(erro))
+    finally:
+        medico_service.close_connection()
