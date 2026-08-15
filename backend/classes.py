@@ -137,7 +137,7 @@ class Consulta(ConexaoDatabase):
         if consulta_existente:
             raise ValueError("Data e horário indisponíveis para o médico selecionado")
 
-        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao))
+        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao) VALUES (?, ?, ?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao))
         self.connect.commit()
         return True
 
