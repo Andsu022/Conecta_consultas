@@ -7,6 +7,7 @@ class ConexaoDatabase:
         self.connect = sqlite3.connect("databank.db")
         self.connect.execute("PRAGMA foreign_keys = ON")
         self.connect.row_factory = sqlite3.Row
+        return self.connect
 
     def close_connection(self):
         self.connect.close()
@@ -114,7 +115,7 @@ class Consulta(ConexaoDatabase):
             situacao TEXT NOT NULL,
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
             FOREIGN KEY (medico_id) REFERENCES Medicos(id),
-            UNIQUE(medico_id, data_consulta, hora_consulta)
+            UNIQUE(medico_id, data_consulta, hora_consulta),
             UNIQUE(paciente_id, data_consulta, hora_consulta)
         )''')
         self.connect.commit()
