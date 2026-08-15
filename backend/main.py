@@ -22,7 +22,7 @@ class ConsultaCreate(BaseModel):
     medico_id: int
     data_consulta: date
     hora_consulta: time
-    observaçao: str
+    observacao: str
     situacao: str
 
 app = FastAPI()
