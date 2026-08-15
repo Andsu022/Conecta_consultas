@@ -110,6 +110,8 @@ class Consulta(ConexaoDatabase):
             medico_id INTEGER NOT NULL,
             data_consulta TEXT NOT NULL,
             hora_consulta TEXT NOT NULL,
+            observacao TEXT NOT NULL,
+            situacao TEXT NOT NULL,
             FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
             FOREIGN KEY (medico_id) REFERENCES Medicos(id),
             UNIQUE(medico_id, data_consulta, hora_consulta)
@@ -127,20 +129,20 @@ class Consulta(ConexaoDatabase):
         else:
             return True
 
-    def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta):
+    def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao):
         self.cursor = self.connect.cursor()
         consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
         
         if consulta_existente:
             raise ValueError("Data e horário indisponíveis para o médico selecionado")
 
-        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta))
+        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao) VALUES (?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao))
         self.connect.commit()
         return True
 
     def listar_consultas(self):
         self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta FROM Consultas")
+        self.cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta, situacao FROM Consultas")
         consultas = self.cursor.fetchall()
         
         if not consultas:
