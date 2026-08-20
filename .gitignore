@@ -18,7 +18,7 @@ __pycache__/
 *.sqlite
 *.sqlite3
 backend/*.db
-backend/databank/*.db
+backend/database/*.db
 
 # Chaves de segurança, senhas e variáveis de ambiente
 .env
@@ -42,10 +42,3 @@ logs/
 Thumbs.db
 desktop.ini
 
-# Arquivos gerados por testes locais e ferramentas
-.pytest_cache/
-__pycache__/
-*.py[cod]
-
-# Venv específicos do projeto
-backend/.venv/
