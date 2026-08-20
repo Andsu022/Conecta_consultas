@@ -21,7 +21,7 @@ class Paciente(ConexaoDatabase):
             nome TEXT NOT NULL,
             cpf TEXT NOT NULL UNIQUE,
             data_nascimento TEXT NOT NULL,
-            telefone TEXT NOT NULL UNIQUE,
+            telefone TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE
         )''')
         self.connect.commit()
