@@ -1,6 +1,6 @@
 # Conecta Consulta
 
-O **Conecta Consulta** é um sistema de agendamento de consultas médicas e gestão de cadastros (pacientes e médicos), desenvolvido em Python com persistência local em SQLite e API REST construída com FastAPI.
+O **Conecta Consulta** é um sistema de agendamento de consultas médicas e gestão de cadastros (pacientes e médicos), desenvolvido em Python com persistência local em SQLite e API REST construída com FastAPI, além de uma interface web em desenvolvimento.
 
 ## Visão Geral
 
@@ -10,6 +10,7 @@ O projeto está estruturado em:
   - `Medico`: Criação de tabela, verificação de duplicidade por CRM, cadastro e listagem.
   - `Consulta`: Criação de tabela com relacionamentos (Foreign Keys para Paciente e Médico), verificação de disponibilidade de horário e agendamento.
 - **[backend/main.py](backend/main.py)**: API REST desenvolvida com FastAPI e Pydantic para validação de dados e comunicação HTTP, contando com suporte a CORS.
+- **[interface/](interface/)**: Estrutura da interface frontend web (`index.html`, `style.css`, `app.js`) para visualização e interação do usuário final.
 
 ## 🚀 Tecnologias
 
@@ -18,6 +19,7 @@ O projeto está estruturado em:
 - **Pydantic** (Validação de schemas e dados de entrada)
 - **Uvicorn** (Servidor ASGI)
 - **SQLite3** (Persistência de dados local)
+- **HTML5 / CSS3 / JavaScript** (Interface web em desenvolvimento)
 
 ## 📁 Estrutura do Projeto
 
@@ -27,6 +29,7 @@ Conecte_Consulta/
 │   ├── database/         # Armazenamento local do banco de dados (databank.db)
 │   ├── classes.py        # Classes (Paciente, Medico, Consulta) e operações SQLite
 │   └── main.py           # Servidor FastAPI (rotas REST, validação Pydantic e CORS)
+├── interface/            # Interface web frontend (index.html, style.css, app.js)
 ├── requirements.txt      # Dependências do projeto
 ├── .gitignore
 └── README.md
@@ -81,10 +84,12 @@ Após iniciar o servidor, você pode acessar e testar as rotas via documentaçã
 - `POST /paciente` — Cadastrar um novo paciente.
 - `GET /paciente` — Listar todos os pacientes cadastrados.
 - `POST /medico` — Cadastrar um novo médico.
+- `GET /medico` — Listar todos os médicos cadastrados.
 
 ---
 
 ## 📝 Status do Projeto
 
-O projeto conta com a estrutura completa de classes e banco de dados para Pacientes, Médicos e Consultas, além da integração inicial de rotas HTTP com FastAPI. Em desenvolvimento contínuo.
+O projeto conta com a estrutura completa de regras de negócio em SQLite (`Paciente`, `Medico`, `Consulta`), endpoints REST operacionais no FastAPI para gestão de pacientes e médicos, e a estrutura base da interface web (`interface/`) preparada para futura integração. Em desenvolvimento contínuo.
+
 
