@@ -92,3 +92,8 @@ def listar_medicos():
         raise HTTPException(status_code=404, detail=str(erro))
     finally:
         medico_service.close_connection()
+
+
+@app.post("/consulta", status_code=201)
+def agendar_consulta(consulta:ConsultaCreate):
+    pass

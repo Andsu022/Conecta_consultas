@@ -53,7 +53,7 @@ class Paciente(ConexaoDatabase):
         pacientes = self.cursor.fetchall()
         
         if not pacientes:
-            raise ValueError("Nenhum paciente cadastrado")
+            return []
 
         return [dict(paciente) for paciente in pacientes]
 
@@ -96,7 +96,7 @@ class Medico(ConexaoDatabase):
         medicos = self.cursor.fetchall()
         
         if not medicos:
-            raise ValueError("Nenhum médico cadastrado")
+            return []
         
         return [dict(medico) for medico in medicos]
             
@@ -147,6 +147,6 @@ class Consulta(ConexaoDatabase):
         consultas = self.cursor.fetchall()
         
         if not consultas:
-            raise ValueError("Nenhuma consulta agendada")
+            return []
         
         return [dict(consulta) for consulta in consultas]
