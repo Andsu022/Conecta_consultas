@@ -1,6 +1,6 @@
-# Conecta Consulta
+# Conecta Consultas
 
-O **Conecta Consulta** é um sistema de agendamento de consultas médicas e gestão de cadastros (pacientes e médicos), desenvolvido em Python com persistência local em SQLite e API REST construída com FastAPI, além de uma interface web em desenvolvimento.
+O **Conecta Consultas** é um sistema de agendamento de consultas médicas e gestão de cadastros (pacientes e médicos), desenvolvido em Python com persistência local em SQLite e API REST construída com FastAPI, além de uma interface web em desenvolvimento.
 
 ## Visão Geral
 
@@ -10,7 +10,9 @@ O projeto está estruturado em:
   - `Medico`: Criação de tabela, verificação de duplicidade por CRM, cadastro e listagem.
   - `Consulta`: Criação de tabela com relacionamentos (Foreign Keys para Paciente e Médico), verificação de disponibilidade de horário e agendamento.
 - **[backend/main.py](backend/main.py)**: API REST desenvolvida com FastAPI e Pydantic para validação de dados e comunicação HTTP, contando com suporte a CORS.
+- **[docs/requirements.md](docs/requirements.md)**: Documentação de requisitos do sistema e mapeamento de usuários/regras.
 - **[interface/](interface/)**: Estrutura da interface frontend web (`index.html`, `style.css`, `app.js`) para visualização e interação do usuário final.
+- **[tests/](tests/)**: Diretório reservado para testes automatizados da aplicação.
 
 ## 🚀 Tecnologias
 
@@ -24,15 +26,21 @@ O projeto está estruturado em:
 ## 📁 Estrutura do Projeto
 
 ```text
-Conecte_Consulta/
+Conecta_Consultas/
 ├── backend/
 │   ├── database/         # Armazenamento local do banco de dados (databank.db)
 │   ├── classes.py        # Classes (Paciente, Medico, Consulta) e operações SQLite
 │   └── main.py           # Servidor FastAPI (rotas REST, validação Pydantic e CORS)
-├── interface/            # Interface web frontend (index.html, style.css, app.js)
-├── requirements.txt      # Dependências do projeto
-├── .gitignore
-└── README.md
+├── docs/
+│   └── requirements.md   # Especificação e requisitos do sistema
+├── interface/
+│   ├── app.js            # Lógica frontend e integração com a API
+│   ├── index.html        # Estrutura HTML da interface
+│   └── style.css         # Folha de estilos (CSS)
+├── tests/                # Testes automatizados do projeto
+├── .gitignore            # Arquivos ignorados pelo controle de versão Git
+├── README.md             # Documentação principal do projeto
+└── requirements.txt      # Dependências do projeto Python
 ```
 
 ## 🛠️ Como Executar
