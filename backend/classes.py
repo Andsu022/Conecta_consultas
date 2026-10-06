@@ -7,7 +7,7 @@ class ConexaoDatabase:
         self.connect = sqlite3.connect("databank.db")
         self.connect.execute("PRAGMA foreign_keys = ON")
         self.connect.row_factory = sqlite3.Row
-        return self.connect
+        return None
 
     def close_connection(self):
         self.connect.close()
