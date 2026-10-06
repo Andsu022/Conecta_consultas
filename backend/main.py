@@ -96,4 +96,18 @@ def listar_medicos():
 
 @app.post("/consulta", status_code=201)
 def agendar_consulta(consulta:ConsultaCreate):
-    pass
+    consulta_service = classes.Consulta()
+    try:
+        consulta_service.agendar_consulta(
+            paciente_id = consulta.paciente_id,
+            medico_id = consulta.medico_id,
+            data_consulta = consulta.data_consulta,
+            hora_consulta = consulta.hora_consulta,
+            observacao = consulta.observacao,
+            situacao = consulta.situacao
+        )
+        return {"message": "Consulta agendada com sucesso"}
+    except ValueError as erro:
+        raise HTTPException(status_code=409, detail=str(erro))
+    finally:
+        consulta_service.close_connection()

@@ -54,7 +54,7 @@ Conecta_Consultas/
 **Windows (PowerShell):**
 ```powershell
 python -m venv backend/venv
-.\backend\venv\Scripts\Activate.ps1
+.\\backend\venv\Scripts\Activate.ps1
 ```
 
 **Linux / macOS:**
