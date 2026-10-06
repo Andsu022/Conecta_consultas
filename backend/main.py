@@ -1,10 +1,26 @@
 # Criação de rotas e API REST no FastAPI
+from typing_extensions import Literal
 from backend import classes
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date, time
+import sqlite3
+from contextlib import asynccontextmanager
+from backend.db import DB_PATH, init_db
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(DB_PATH)
+    try:
+        init_db(connection)
+    finally:
+        connection.close()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 class PacienteCreate(BaseModel):
     nome: str
     cpf: str
@@ -22,10 +38,9 @@ class ConsultaCreate(BaseModel):
     medico_id: int
     data_consulta: date
     hora_consulta: time
-    observacao: str
-    situacao: str
+    observacao: str | None = None
+    situacao: Literal['agendada', 'realizada', 'cancelada'] = 'agendada'
 
-app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -101,7 +116,7 @@ def agendar_consulta(consulta:ConsultaCreate):
         consulta_service.agendar_consulta(
             paciente_id = consulta.paciente_id,
             medico_id = consulta.medico_id,
-            data_consulta = consulta.data_consulta,
+            data_consulta = consulta.data_consulta.isoformat(),
             hora_consulta = consulta.hora_consulta.isoformat(),
             observacao = consulta.observacao,
             situacao = consulta.situacao

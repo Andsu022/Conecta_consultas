@@ -1,30 +1,10 @@
 # Regras de negócio\classe de dados e interação com o banco de dados
 
 import sqlite3
-
-class ConexaoDatabase:
-    def __init__(self):
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.execute("PRAGMA foreign_keys = ON")
-        self.connect.row_factory = sqlite3.Row
-        return None
-
-    def close_connection(self):
-        self.connect.close()
-
-class Paciente(ConexaoDatabase):
-    def __init__(self):  # Conexão com o banco de dados
-        super().__init__()
-        self.cursor = self.connect.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            cpf TEXT NOT NULL UNIQUE,
-            data_nascimento TEXT NOT NULL,
-            telefone TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE
-        )''')
-        self.connect.commit()
+from backend.db import get_connection, init_db
+class Paciente:
+    def __init__(self, connection:sqlite3.Connection):
+        self.connect = connection
 
     def paciente_existente(self, cpf, email):
         self.cursor = self.connect.cursor()
@@ -62,12 +42,7 @@ class Medico(ConexaoDatabase):
     def __init__(self):  # Conexão com o banco de dados
         super().__init__()
         self.cursor = self.connect.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            crm TEXT NOT NULL UNIQUE,
-            especialidade TEXT NOT NULL
-        )''')
+        self.cursor.execute()
         self.connect.commit()
 
     def medico_cadastrado(self, crm):
