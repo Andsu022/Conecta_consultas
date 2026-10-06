@@ -1,5 +1,5 @@
 # Criação de rotas e API REST no FastAPI
-import classes
+from backend import classes
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -102,7 +102,7 @@ def agendar_consulta(consulta:ConsultaCreate):
             paciente_id = consulta.paciente_id,
             medico_id = consulta.medico_id,
             data_consulta = consulta.data_consulta,
-            hora_consulta = consulta.hora_consulta,
+            hora_consulta = consulta.hora_consulta.isoformat(),
             observacao = consulta.observacao,
             situacao = consulta.situacao
         )
