@@ -8,7 +8,7 @@ class Paciente:
  
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
         try:
-            self.connect.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
+            patient = self.connect.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
             self.connect.commit()
 
         except sqlite3.IntegrityError as e:
@@ -21,7 +21,7 @@ class Paciente:
                 raise ValueError("Email já cadastrado !")
             raise
 
-        return cur
+        return patient.lastrowid
 
     def listar_paciente(self):
 
