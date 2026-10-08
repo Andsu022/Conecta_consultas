@@ -1,74 +1,38 @@
 # Regras de negócio\classe de dados e interação com o banco de dados
-
 import sqlite3
+from backend.db import get_connection, init_db
 
-class ConexaoDatabase:
-    def __init__(self):
-        self.connect = sqlite3.connect("databank.db")
-        self.connect.execute("PRAGMA foreign_keys = ON")
-        self.connect.row_factory = sqlite3.Row
-        return None
-
-    def close_connection(self):
-        self.connect.close()
-
-class Paciente(ConexaoDatabase):
-    def __init__(self):  # Conexão com o banco de dados
-        super().__init__()
-        self.cursor = self.connect.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            cpf TEXT NOT NULL UNIQUE,
-            data_nascimento TEXT NOT NULL,
-            telefone TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE
-        )''')
-        self.connect.commit()
-
-    def paciente_existente(self, cpf, email):
-        self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT cpf, email FROM Pacientes WHERE cpf = ? OR email = ?", (cpf, email))
-        result = self.cursor.fetchone()
-        
-        if result is None:
-            return False
-        else:
-            return True
+class Paciente:
+    def __init__(self, connection:sqlite3.Connection):
+        self.connect = connection
  
     def cadastrar_paciente(self, nome, cpf, data_nascimento, telefone, email):
-        self.cursor = self.connect.cursor()
-        paciente_existente = self.paciente_existente(cpf,email)
-        if paciente_existente:
-            raise ValueError("CPF ou email já existentes")
-        
-        self.cursor.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
-        self.connect.commit()
+        try:
+            self.connect.execute("""INSERT INTO Pacientes (nome, cpf, data_nascimento, telefone, email) VALUES (?, ?, ?, ?, ?)""", (nome, cpf, data_nascimento, telefone, email))
+            self.connect.commit()
 
-        return True
+        except sqlite3.IntegrityError as e:
+            self.connect.rollback()
+            mensage = str(e)
 
-    def listar_pacientes(self):
-        self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes")
-        pacientes = self.cursor.fetchall()
-        
-        if not pacientes:
-            return []
+            if "Pacientes.cpf" in mensage:
+                raise ValueError("CPF já cadastrado !")
+            if "Pacientes.email" in mensage:
+                raise ValueError("Email já cadastrado !")
+            raise
 
-        return [dict(paciente) for paciente in pacientes]
+        return cur
+
+    def listar_paciente(self):
+
+        rows = self.connect.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes").fetchall()
+
+        return [dict(r) for r in rows]
 
 
-class Medico(ConexaoDatabase):
-    def __init__(self):  # Conexão com o banco de dados
-        super().__init__()
-        self.cursor = self.connect.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Medicos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            crm TEXT NOT NULL UNIQUE,
-            especialidade TEXT NOT NULL
-        )''')
-        self.connect.commit()
+class Medico():
+    def __init__(self, connection:sqlite3.Connection):
+        self.connect = connection
 
     def medico_cadastrado(self, crm):
         self.cursor = self.connect.cursor()
@@ -101,24 +65,9 @@ class Medico(ConexaoDatabase):
         return [dict(medico) for medico in medicos]
             
 
-class Consulta(ConexaoDatabase):
-    def __init__(self):  # Conexão com o banco de dados
-        super().__init__()
-        self.cursor = self.connect.cursor()
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Consultas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            paciente_id INTEGER NOT NULL,
-            medico_id INTEGER NOT NULL,
-            data_consulta TEXT NOT NULL,
-            hora_consulta TEXT NOT NULL,
-            observacao TEXT NOT NULL,
-            situacao TEXT NOT NULL,
-            FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
-            FOREIGN KEY (medico_id) REFERENCES Medicos(id),
-            UNIQUE(medico_id, data_consulta, hora_consulta),
-            UNIQUE(paciente_id, data_consulta, hora_consulta)
-        )''')
-        self.connect.commit()
+class Consulta():
+    def __init__(self, connection:sqlite3.Connection):
+        self.connect = connection
 
     def consulta_existente(self, medico_id, data_consulta, hora_consulta):
         self.cursor = self.connect.cursor()
