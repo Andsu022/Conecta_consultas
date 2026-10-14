@@ -1,6 +1,10 @@
 # Dependências do projeto Conecta Consultas
+
+# Framework Web e Servidor ASGI
 fastapi==0.139.2
 uvicorn==0.51.0
-pydantic==2.13.4
 starlette==1.3.1
+
+# Validação de Dados, Modelos e Tipagem
+pydantic==2.13.4
 typing-extensions==4.16.0

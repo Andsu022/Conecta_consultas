@@ -1,4 +1,5 @@
 # Conecta Consultas - Arquivos ignorados pelo Git
+
 # Ambientes Virtuais (Python Virtual Environments)
 venv/
 .venv/
@@ -13,17 +14,27 @@ __pycache__/
 *.so
 .pytest_cache/
 .coverage
+.coverage.*
+htmlcov/
 
-# Bancos de dados e dados locais
+# Bancos de dados e dados locais (SQLite e arquivos de transação/WAL)
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
+*.sqlite-journal
 backend/*.db
 backend/database/*.db
+backend/database/*.db-journal
+backend/database/*.db-wal
+backend/database/*.db-shm
 
 # Chaves de segurança, senhas e variáveis de ambiente
 .env
-.env.local
+.env.*
+!.env.example
 *.pem
 *.pub
 id_rsa*
@@ -43,5 +54,7 @@ logs/
 Thumbs.db
 desktop.ini
 
-# Arquivos de anotações
+# Arquivos de anotações e temporários
 annotations.txt
+*.bak
+*.tmp
