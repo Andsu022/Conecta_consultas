@@ -1,13 +1,15 @@
 # Criação de rotas e API REST no FastAPI
-from typing_extensions import Literal
+from typing import Literal
 from backend import classes
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date, time
+
 import sqlite3
 from contextlib import asynccontextmanager
-from backend.db import DB_PATH, init_db
+from backend.db import DB_PATH, init_db, get_connection
 
 
 @asynccontextmanager
@@ -21,6 +23,16 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"]
+)
+
+
 class PacienteCreate(BaseModel):
     nome: str
     cpf: str
@@ -41,47 +53,46 @@ class ConsultaCreate(BaseModel):
     observacao: str | None = None
     situacao: Literal['agendada', 'realizada', 'cancelada'] = 'agendada'
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"]
-)
+# Dependencias de conexão da requisição
+def get_paciente_service(connection: sqlite3.Connection = Depends(get_connection)):
+    return classes.Paciente(connection)
 
+def get_medico_service(connection: sqlite3.Connection = Depends(get_connection)):
+    return classes.Medico(connection)
+
+def get_consulta_service(connection: sqlite3.Connection = Depends(get_connection)):
+    return classes.Consulta(connection)
+
+#Paciente
 @app.post("/paciente", status_code=201)
-def cadastrar_paciente(paciente:PacienteCreate):
-    paciente_service = classes.Paciente()
+def cadastrar_paciente(
+    paciente: PacienteCreate, 
+    paciente_service: classes.Paciente = Depends(get_paciente_service)):
+
     try: 
-        paciente_service.cadastrar_paciente(
+        id_paciente = paciente_service.cadastrar_paciente(
             nome = paciente.nome,
             cpf = paciente.cpf,
-            data_nascimento = paciente.data_nascimento,
+            data_nascimento = paciente.data_nascimento.isoformat(),
             telefone = paciente.telefone,
             email = paciente.email
         )
-        return {"message": "Paciente cadastrado com sucesso"}
 
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
-    finally:
-        paciente_service.close_connection()
+    
+    return {"id": id_paciente, "message": "Paciente cadastrado com sucesso"}
 
 @app.get("/paciente")
-def listar_pacientes():
-    paciente_service = classes.Paciente()
-    try:
-        lista_pacientes = paciente_service.listar_pacientes()
-        return lista_pacientes
-        
-    except ValueError as erro:
-        raise HTTPException(status_code=404, detail=str(erro))
-    finally:
-        paciente_service.close_connection()
+def listar_pacientes(paciente_service: classes.Paciente = Depends(get_paciente_service)):
+    return paciente_service.listar_paciente()
 
+#Médico
 @app.post("/medico", status_code=201)
-def cadastrar_medico(medico:MedicoCreate):
-    medico_service = classes.Medico()
+def cadastrar_medico(
+    medico:MedicoCreate,
+    medico_service: classes.Medico = Depends(get_medico_service)):
+
     try:
         medico_service.cadastrar_medico(
             nome = medico.nome,
@@ -89,29 +100,21 @@ def cadastrar_medico(medico:MedicoCreate):
             especialidade = medico.especialidade
         )
 
-        return {"message": "Médico cadastrado com sucesso"}
-
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
-    finally:
-        medico_service.close_connection()
+
+    return {"message": "Médico cadastrado com sucesso"}
 
 @app.get("/medico")
-def listar_medicos():
-    medico_service = classes.Medico()
-    try:
-        lista_medicos = medico_service.listar_medicos()
-        return lista_medicos
+def listar_medicos(medico_service: classes.Medico = Depends(get_medico_service)):
+    return medico_service.listar_medicos()
 
-    except ValueError as erro:
-        raise HTTPException(status_code=404, detail=str(erro))
-    finally:
-        medico_service.close_connection()
-
-
+#Consulta
 @app.post("/consulta", status_code=201)
-def agendar_consulta(consulta:ConsultaCreate):
-    consulta_service = classes.Consulta()
+def agendar_consulta(
+    consulta:ConsultaCreate,
+    consulta_service: classes.Consulta = Depends(get_consulta_service)):
+
     try:
         consulta_service.agendar_consulta(
             paciente_id = consulta.paciente_id,
@@ -121,8 +124,14 @@ def agendar_consulta(consulta:ConsultaCreate):
             observacao = consulta.observacao,
             situacao = consulta.situacao
         )
-        return {"message": "Consulta agendada com sucesso"}
+
+    except LookupError as erro:
+        raise HTTPException(status_code=404, detail=str(erro))
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
-    finally:
-        consulta_service.close_connection()
+    
+    return {"message": "Consulta agendada com sucesso"}
+
+@app.get("/consulta/{id}")
+def listar_consultas(consulta_service: classes.Consulta = Depends(get_consulta_service)):
+    return consulta_service.listar_consultas()
