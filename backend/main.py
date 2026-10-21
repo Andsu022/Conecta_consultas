@@ -46,7 +46,7 @@ def cadastrar_paciente(
 
 @app.get("/paciente")
 def listar_pacientes(paciente_service: classes.Paciente = Depends(get_paciente_service)):
-    return paciente_service.listar_paciente()
+    return paciente_service.listar_pacientes()
 
 #Médico
 @app.post("/medico", status_code=201)

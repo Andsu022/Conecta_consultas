@@ -23,7 +23,7 @@ class Paciente:
 
         return patient.lastrowid
 
-    def listar_paciente(self):
+    def listar_pacientes(self):
 
         rows = self.connect.execute("SELECT id, nome, cpf, data_nascimento, telefone, email FROM Pacientes").fetchall()
 
@@ -33,16 +33,6 @@ class Paciente:
 class Medico():
     def __init__(self, connection:sqlite3.Connection):
         self.connect = connection
-
-    def medico_cadastrado(self, crm):
-        self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT crm FROM Medicos WHERE crm = ?", (crm,))
-        result = self.cursor.fetchone()
-        
-        if result is None:
-            return False
-        else:
-            return True
 
     def cadastrar_medico(self, nome, crm, especialidade):
         self.cursor = self.connect.cursor()
