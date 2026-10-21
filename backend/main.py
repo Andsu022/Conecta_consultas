@@ -1,25 +1,17 @@
 # Criação de rotas e API REST no FastAPI
-from typing import Literal
-from backend import classes
-from fastapi import FastAPI, HTTPException, Depends
-
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from datetime import date, time
-
 import sqlite3
 from contextlib import asynccontextmanager
-from backend.db import DB_PATH, init_db, get_connection
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from backend.db import init_db
+from backend.routes import route_consulta, route_medico, route_paciente
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(DB_PATH)
-    try:
-        init_db(connection)
-    finally:
-        connection.close()
+    init_db()
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -31,37 +23,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type", "Authorization"]
 )
-
-
-class PacienteCreate(BaseModel):
-    nome: str
-    cpf: str
-    data_nascimento: date
-    telefone: str
-    email: str
-
-class MedicoCreate(BaseModel):
-    nome: str
-    crm: str
-    especialidade: str
-
-class ConsultaCreate(BaseModel):
-    paciente_id: int
-    medico_id: int
-    data_consulta: date
-    hora_consulta: time
-    observacao: str | None = None
-    situacao: Literal['agendada', 'realizada', 'cancelada'] = 'agendada'
-
-# Dependencias de conexão da requisição
-def get_paciente_service(connection: sqlite3.Connection = Depends(get_connection)):
-    return classes.Paciente(connection)
-
-def get_medico_service(connection: sqlite3.Connection = Depends(get_connection)):
-    return classes.Medico(connection)
-
-def get_consulta_service(connection: sqlite3.Connection = Depends(get_connection)):
-    return classes.Consulta(connection)
 
 #Paciente
 @app.post("/paciente", status_code=201)
