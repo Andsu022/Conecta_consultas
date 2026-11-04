@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
-from datetime import date, datetime
+from datetime import date
 
 class PacienteCreate(BaseModel):
     nome: str = Field(min_length=2, max_length=120)

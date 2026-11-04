@@ -16,6 +16,15 @@ __pycache__/
 .coverage
 .coverage.*
 htmlcov/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Distribuição e empacotamento
+build/
+dist/
+*.egg-info/
+*.egg
 
 # Bancos de dados e dados locais (SQLite e arquivos de transação/WAL)
 *.db
@@ -52,9 +61,12 @@ logs/
 # Arquivos do Sistema Operacional
 .DS_Store
 Thumbs.db
-desktop.ini
+ehthumbs.db
+[Dd]esktop.ini
 
 # Arquivos de anotações e temporários
-annotations.txt
+annotations*.txt
+anotacoes*.txt
+anotações*.txt
 *.bak
 *.tmp

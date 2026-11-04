@@ -1,6 +1,6 @@
 # Regras de negócio\classe de dados e interação com o banco de dados
+# o retorno dos métodos de cadastro está em inglês para evitar confusão com o nome das classes !
 import sqlite3
-from backend.db import get_connection, init_db
 
 class Paciente:
     def __init__(self, connection:sqlite3.Connection):
@@ -47,6 +47,7 @@ class Medico():
                 raise ValueError("Médico já cadastrado !")
             raise
 
+        return doctor.lastrowid
 
     def listar_medicos(self):
         
@@ -59,33 +60,31 @@ class Consulta():
     def __init__(self, connection:sqlite3.Connection):
         self.connect = connection
 
-    def consulta_existente(self, medico_id, data_consulta, hora_consulta):
-        self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT medico_id, data_consulta, hora_consulta FROM Consultas WHERE medico_id = ? AND data_consulta = ? AND hora_consulta = ?", (medico_id, data_consulta, hora_consulta))
-        result = self.cursor.fetchone()
-        
-        if result is None:
-            return False
-        else:
-            return True
-
     def agendar_consulta(self, paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao):
-        self.cursor = self.connect.cursor()
-        consulta_existente = self.consulta_existente(medico_id, data_consulta, hora_consulta)
+        try:      
+            appointment = self.connect.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao) VALUES (?, ?, ?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao))
+            self.connect.commit()
         
-        if consulta_existente:
-            raise ValueError("Data e horário indisponíveis para o médico selecionado")
+        except sqlite3.IntegrityError as e:
+            self.connect.rollback()
+            message = str(e)
 
-        self.cursor.execute("""INSERT INTO Consultas (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao) VALUES (?, ?, ?, ?, ?, ?)""", (paciente_id, medico_id, data_consulta, hora_consulta, observacao, situacao))
-        self.connect.commit()
-        return True
+            if "FOREIGN KEY constraint failed" in message:
+                raise LookupError("Paciente ou médico informado não existe")
+            elif "Consultas.medico_id" in message:
+                raise ValueError("Médico já possui consulta nesse horário")
+            elif "Consultas.paciente_id" in message:
+                raise ValueError("Paciente já possui consulta nesse horário")
+            elif "CHECK constraint failed" in message:
+                raise ValueError("Situação da consulta inválida")
+            raise
 
-    def listar_consultas(self):
-        self.cursor = self.connect.cursor()
-        self.cursor.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta, situacao FROM Consultas")
-        consultas = self.cursor.fetchall()
-        
-        if not consultas:
-            return []
-        
-        return [dict(consulta) for consulta in consultas]
+        return appointment.lastrowid
+
+    def buscar_consulta(self, id):
+
+        row = self.connect.execute("SELECT id, paciente_id, medico_id, data_consulta, hora_consulta, situacao FROM Consultas WHERE id = ?", (id, )).fetchone()
+        if row is None:
+            return None
+
+        return dict(row)

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import date, time
+from typing import Literal
 
 class ConsultaCreate(BaseModel):
     paciente_id: int

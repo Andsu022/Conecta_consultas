@@ -35,7 +35,7 @@ def init_db() -> None:
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT NOT7 NULL,
+                nome TEXT NOT NULL,
                 cpf TEXT NOT NULL UNIQUE,
                 data_nascimento TEXT NOT NULL,
                 telefone TEXT NOT NULL,

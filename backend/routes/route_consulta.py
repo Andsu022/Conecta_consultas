@@ -1,19 +1,19 @@
-from schemas.schema_consulta import ConsultaCreate
-from pydantic import BaseModel
+from backend.schemas.schema_consulta import ConsultaCreate
 
 from fastapi import APIRouter, Depends, HTTPException
+from backend import classes
 from backend.dependencies import get_consulta_service
-from fastapi.responses import JSONResponse
 
+router = APIRouter(prefix="/consulta", tags=["Consultas"])
 
 #Consulta
-@app.post("/consulta", status_code=201)
+@router.post("", status_code=201)
 def agendar_consulta(
     consulta:ConsultaCreate,
     consulta_service: classes.Consulta = Depends(get_consulta_service)):
 
     try:
-        consulta_service.agendar_consulta(
+        id_consulta = consulta_service.agendar_consulta(
             paciente_id = consulta.paciente_id,
             medico_id = consulta.medico_id,
             data_consulta = consulta.data_consulta.isoformat(),
@@ -27,8 +27,12 @@ def agendar_consulta(
     except ValueError as erro:
         raise HTTPException(status_code=409, detail=str(erro))
     
-    return {"message": "Consulta agendada com sucesso"}
+    return {"id": id_consulta, "message": "Consulta agendada com sucesso"}
 
-@app.get("/consulta/{id}")
-def listar_consultas(consulta_service: classes.Consulta = Depends(get_consulta_service)):
-    return consulta_service.listar_consultas()
+@router.get("/{id}")
+def buscar_consulta(id: int, consulta_service: classes.Consulta = Depends(get_consulta_service)):
+    consulta = consulta_service.buscar_consulta(id)
+    if consulta is None:
+        raise HTTPException(status_code=404, detail="Consulta não encontrada !")
+
+    return consulta
