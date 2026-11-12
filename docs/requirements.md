@@ -12,8 +12,8 @@ Desenvolver uma plataforma web que permita aos pacientes visualizar
 
 - Pacientes: Usuários que desejam agendar consultas médicas.
 - Recepcionistas: Usuários que gerenciam os agendamentos e auxiliam os pacientes.
-- Administrador: Usuário responsável por gerenciar o sistema, incluindo a criação de contas de recepcionistas e médicos
-e edição de informações.
+- Administrador: Usuário responsável por gerenciar o sistema, incluindo a criação de contas de recepcionistas e médicos e edição de informações.
+- Médico: Usuário que visualiza suas consultas do dia.
 
 ## Problemas identificados
 

@@ -33,6 +33,24 @@ def init_db() -> None:
         connection.execute("PRAGMA journal_mode = WAL")
         cursor = connection.cursor()
 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS Administrador(
+                matricula INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                cpf TEXT NOT NULL UNIQUE,
+                senha TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                cargo TEXT NOT NULL default 'administrador'     
+            )''')
+        
+        cursor.execute('''CREATE TABLE IF NOT EXISTS Recepcionista(
+                matricula INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                cpf TEXT NOT NULL UNIQUE,
+                senha TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                cargo TEXT NOT NULL default 'recepcionista'
+            )''')
+            
         cursor.execute('''CREATE TABLE IF NOT EXISTS Pacientes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL,
@@ -57,7 +75,8 @@ def init_db() -> None:
                 hora_consulta TEXT NOT NULL,
                 observacao TEXT,
                 situacao TEXT NOT NULL default 'agendada'
-                    CHECK (situacao IN ('agendada', 'realizada', 'cancelada')),
+                
+                CHECK (situacao IN ('agendada', 'realizada', 'cancelada')),
                 FOREIGN KEY (paciente_id) REFERENCES Pacientes(id),
                 FOREIGN KEY (medico_id) REFERENCES Medicos(id)
             )''')
