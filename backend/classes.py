@@ -30,6 +30,17 @@ class Paciente:
 
         return [dict(r) for r in rows]
 
+    def deletar_paciente(self, id_paciente):
+        cursor = self.connect.cursor()
+        cursor.execute("SELECT id FROM Pacientes WHERE id = ?", (id_paciente,))
+        paciente = cursor.fetchone()
+
+        if paciente is None:
+            raise ValueError("Paciente não encontrado !")
+
+        self.connect.execute("DELETE FROM Pacientes WHERE id = ?", (id_paciente,))
+        self.connect.commit()
+
 
 class Medico():
     def __init__(self, connection:sqlite3.Connection):

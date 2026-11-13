@@ -29,3 +29,12 @@ def cadastrar_paciente(
 @router.get("")
 def listar_pacientes(paciente_service: classes.Paciente = Depends(get_paciente_service)):
     return paciente_service.listar_pacientes()
+
+@router.delete("/{id_paciente}")
+def deletar_paciente(id_paciente: int, paciente_service: classes.Paciente = Depends(get_paciente_service)):
+    try:
+        paciente_service.deletar_paciente(id_paciente)
+    except ValueError as erro:
+        raise HTTPException(status_code=404, detail=str(erro))
+    
+    return {"message": "Paciente deletado com sucesso"}
